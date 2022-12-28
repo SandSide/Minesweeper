@@ -19,21 +19,25 @@ public class Grid : MonoBehaviour
     private Vector2 bottomLeftCornerPos;
     public GridNode[,] grid;
 
-    // Start is called before the first frame update
-    void Awake()
-    {
-        CreateGrid();
-    }
+    // // Start is called before the first frame update
+    // void Awake()
+    // {
+    //     CreateGrid();
+    // }
 
     // void Update(){
-    //     mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-    //     highLightedNode = WorldPositionToGridNode(mousePos);
+    //     if(Input.GetMouseButtonDown(0))
+    //     {
+    //         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    //         GridNode test = WorldPositionToGridNode(mousePos);
+    //         test.test = true;
+    //     }
     // }
 
     /// <summary>
     /// Creates a grid of nodes in the center of this components object postition.
     /// </summary>
-    void CreateGrid()
+    public void CreateGrid()
     {
         // Create grid container
         grid = new GridNode[width, height];
@@ -50,29 +54,30 @@ public class Grid : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 Vector2 nodePos = bottomLeftCornerPos + Vector2.right * (x * nodeSize + nodeRadius) + Vector2.up * (y * nodeSize + nodeRadius);
-                grid[x, y] = new GridNode(nodePos, false, x, y);
+                grid[x, y] = new GridNode(nodePos, false, x, y, true);
             }
         }
     }
 
-    // /// <summary>
-    // /// Translate world position into grid position
-    // /// </summary>
-    // /// <param name="worldPos">Positon of object in world posiiton</param>
-    // /// <returns> Closest node </returns>
 
-    // public GridNode WorldPositionToGridNode(Vector3 worldPos){
-    //     float percentX = (worldPos.x + (width * nodeSize) / 2) / (width * nodeSize);
-    //     float percentY = (worldPos.y + (height * nodeSize) / 2) / (height * nodeSize);
-    //     percentX = Mathf.Clamp01(percentX);
-    //     percentY = Mathf.Clamp01(percentY);
 
-    //     int x = Mathf.RoundToInt((width - 1) * percentX);
-    //     int y = Mathf.RoundToInt((height - 1) * percentY);
+    /// <summary>
+    /// Translate world position into grid position
+    /// </summary>
+    /// <param name="worldPos">Positon of object in world posiiton</param>
+    /// <returns> Closest node </returns>
+    public GridNode WorldPositionToGridNode(Vector3 worldPos)
+    {
+        Vector2 CornerPosition = new Vector2(worldPos.x, worldPos.y) - bottomLeftCornerPos;
 
-    //     return grid[x, y];
+        Vector2 gridPosition = new Vector2(Mathf.FloorToInt(CornerPosition.x / nodeSize), Mathf.FloorToInt(CornerPosition.y / nodeSize));
 
-    // }
+        gridPosition.x = Mathf.Clamp(gridPosition.x, 0, width - 1);
+        gridPosition.y = Mathf.Clamp(gridPosition.y, 0, height - 1);
+
+        return grid[(int)gridPosition.x, (int)gridPosition.y];
+
+    }
 
 
 
@@ -84,7 +89,8 @@ public class Grid : MonoBehaviour
         if (grid != null){
             if (displayGridGizmos) {
                 // Draw each individual node
-                foreach (GridNode n in grid){
+                foreach (GridNode n in grid)
+                {
                     Gizmos.color = (n.hasBomb) ? Color.red : defaultNodeColour;
 
                     if(n.test)
@@ -92,6 +98,8 @@ public class Grid : MonoBehaviour
                     Gizmos.DrawCube(n.position, gizmoNodeSize);
       
                 }
+
+
             }
         }
     }

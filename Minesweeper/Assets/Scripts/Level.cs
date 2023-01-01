@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class Level : MonoBehaviour
 {
-    private Dictionary<Vector2, GameObject> tileDictonary = new Dictionary<Vector2, GameObject>();
-    private Grid gridInstance;
-
-    public GameObject tile;
-    public int bombAmount = 10;
+    public GameObject tilePrefab;
+    public int bombAmountToSpawn = 10;
     public int width = 10;
     public int height = 10;
     public float nodeSize = .5f;
 
+    private Dictionary<Vector2, GameObject> tileDictonary = new Dictionary<Vector2, GameObject>();
+    private Grid gridInstance;
+    private List<GridNode> visitedNodes = new List<GridNode>();
 
     void Awake()
     {
@@ -28,7 +28,7 @@ public class Level : MonoBehaviour
         Vector3 tileScale = new Vector3(gridInstance.nodeSize, gridInstance.nodeSize, gridInstance.nodeSize);
 
         PlaceTiles(tileScale);
-        PlaceBombs(bombAmount);
+        PlaceBombs(bombAmountToSpawn);
 
     }
 
@@ -37,7 +37,6 @@ public class Level : MonoBehaviour
     {
         if(Input.GetMouseButtonDown(0))
         {
-            Debug.Log("Button Pressed");
             Vector3 cameraPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             SelectTile(cameraPos);
         }
@@ -52,17 +51,15 @@ public class Level : MonoBehaviour
         // Create storage object
         GameObject tileStorage = new GameObject("Tiles");
         tileStorage.transform.parent = transform;
-        tile.transform.localScale = tileScale;
+        tilePrefab.transform.localScale = tileScale;
         
         int id = 0;
 
         // Instance tile for each gridnode as a child
         foreach (var n in gridInstance.grid)
         {
-            GameObject temp = Instantiate(tile, n.position, Quaternion.Euler(Vector3.zero), tileStorage.transform);
+            GameObject temp = Instantiate(tilePrefab, n.position, Quaternion.Euler(Vector3.zero), tileStorage.transform);
             tileDictonary.Add(n.gridPos, temp);
-
-            temp.GetComponent<SpriteRenderer>().color = TileStateColours.Hidden;
             temp.name += id.ToString();
             id++;
         }
@@ -105,29 +102,136 @@ public class Level : MonoBehaviour
     /// <param name="worldPos"> World position to get gridnode of </param>
     public void SelectTile(Vector3 worldPos)
     {
+        // Get Grid node based on mouse pos
         Vector3 cameraPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         GridNode node = gridInstance.WorldPositionToGridNode(cameraPos);
 
+        // If if it wasnt clciked before
         if(node.isHidden)
         {
+            GameObject tile = tileDictonary[node.gridPos];
+
+            // Change state
             if(node.hasBomb)
             {
-                ChangeTileColour(tileDictonary[node.gridPos], TileStateColours.HasBomb);
+                tile.GetComponent<Tile>().ChangeState(TileState.HasBomb);
             }
             else
             {
-                CheckNeighbours(node);
-                ChangeTileColour(tileDictonary[node.gridPos], TileStateColours.Clicked);
+                // COunt bombs around node
+                int bombCount = CheckNeighbours(node);
+                tile.GetComponent<Tile>().ChangeState(TileState.Clicked, bombCount);
+                
+                // If not bombs around it
+                if(bombCount == 0){
+                    visitedNodes = new List<GridNode>();
+                    RecursiveTraverse(node);
+                }
+
+
             } 
  
             node.isHidden = false;   
         }
     }
 
-    public void ChangeTileColour(GameObject tile, Color Colour)
+    /// <summary>
+    /// Get list of nodes around node
+    /// </summary>
+    /// <param name="node"> Node to get neighbours of </param>
+    /// <returns> List of neighbour nodes </returns>
+    public List<GridNode> GetNeighbourNodes(GridNode node)
     {
-        tile.GetComponent<SpriteRenderer>().color = Colour;
+        List<GridNode> nodeList = new List<GridNode>();
+
+        int x = (int)node.gridPos.x;
+        int y = (int)node.gridPos.y;
+
+        for(int i = x - 1; i <= x + 1 && i < gridInstance.width; i++)
+        {
+            for(int j = y - 1; j <= y + 1; j++)
+            {
+
+                if(i >= gridInstance.width || i <0)
+                    continue;
+
+                if(j >= gridInstance.height || j <0)
+                    continue;
+             
+                if(x == i && y == j)
+                    continue;
+
+                nodeList.Add(gridInstance.grid[i,j]);
+            }
+        }
+
+        return nodeList;
     }
+
+
+
+
+    // public void ShowTilesAround(GridNode node)
+    // {
+    //     List<GridNode> neighbours = GetNeighbourNodes(node);
+    //     List<GridNode> checkedNeighbours = new List<GridNode>();
+
+    //     foreach( GridNode n in neighbours)
+    //     {
+            
+
+            
+            
+    //         if(CheckNeighbours(n) == 0)
+    //         {
+    //             GameObject tile = tileDictonary[n.gridPos];
+    //             tile.GetComponent<Tile>().ChangeState(TileState.Clicked);
+
+    //             checkedNeighbours.Add(n);
+                
+    //         }
+    //     }
+    // }
+
+
+
+
+    void RecursiveTraverse(GridNode currentNode)
+    {
+        
+        List<GridNode> neighbours = GetNeighbourNodes(currentNode);
+
+        if(CheckNeighbours(currentNode) == 0)
+        {
+
+            GameObject tile = tileDictonary[currentNode.gridPos];
+
+            tile.GetComponent<Tile>().ChangeState(TileState.Clicked);
+            currentNode.isHidden = false;
+            visitedNodes.Add(currentNode);
+
+
+
+            foreach(GridNode n in neighbours)
+            {
+                tile = tileDictonary[n.gridPos];
+                tile.GetComponent<Tile>().ChangeState(TileState.Clicked, CheckNeighbours(n));
+                n.isHidden = false;
+
+
+                if(!visitedNodes.Contains(n))
+                    RecursiveTraverse(n);
+            }
+
+        }
+    }
+
+
+
+
+
+
+
 
 
     /// <summary>
@@ -137,30 +241,17 @@ public class Level : MonoBehaviour
     /// <returns> Number of bombs around node </returns>
     public int CheckNeighbours(GridNode node)
     {
-        int x = (int)node.gridPos.x;
-        int y = (int)node.gridPos.y;
 
+        List<GridNode> neighbours = GetNeighbourNodes(node);
         int bombCount = 0;
-        for(int i = x - 1; i <= x + 1 && i < gridInstance.width; i++)
+
+        foreach (GridNode n in neighbours)
         {
-
-            for(int j = y - 1; j <= y + 1; j++)
-            {
-
-                if(i >= gridInstance.width || i <0)
-                    continue;
-
-                if(j >= gridInstance.height || j <0)
-                    continue;
-
-                gridInstance.grid[i,j].test = true;
-                
-                if(gridInstance.grid[i,j].hasBomb)
-                    bombCount++;
-            }
+            if(n.hasBomb)
+                bombCount++;
         }
-        
-        return bombAmount;
+
+        return bombCount;
     }
 
 }

@@ -45,10 +45,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dc8c92cca615f54b93cb48605377e57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tile: {fileID: 3025915692586984078, guid: e18667a4149c09346ac3d0dfd0cc6aaf, type: 3}
-  bombAmount: 10
-  width: 10
-  height: 10
+  tilePrefab: {fileID: 3025915692586984078, guid: e18667a4149c09346ac3d0dfd0cc6aaf, type: 3}
+  bombAmountToSpawn: 50
+  width: 30
+  height: 20
+  nodeSize: 0.4
 --- !u!114 &9101545402367527692
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61,7 +62,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 236ec9baf6a5d914db63b899cdaea15b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 0
-  height: 0
-  nodeSize: 0
-  displayGridGizmos: 0
+  width: 50
+  height: 30
+  nodeSize: 2
+  displayGridGizmos: 1

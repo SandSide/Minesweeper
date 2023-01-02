@@ -2,15 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Level : MonoBehaviour
+public class LevelManager : MonoBehaviour
 {
     public GameObject tilePrefab;
+    public GameObject gridBackGround;
     
     [Header("Level Settings")]
-    public int bombAmountToSpawn = 10;
-    public int width = 10;
-    public int height = 10;
-    public float nodeSize = .5f;
+    public LevelScriptableObject levelData;
 
     private Dictionary<Vector2, GameObject> tileDictonary = new Dictionary<Vector2, GameObject>();
     private Grid gridInstance;
@@ -22,16 +20,17 @@ public class Level : MonoBehaviour
     {
         gridInstance = GetComponent<Grid>();
 
-        gridInstance.width = width;
-        gridInstance.height = height;
-        gridInstance.nodeSize = nodeSize;
+        gridInstance.width = levelData.width;
+        gridInstance.height = levelData.height;
+        gridInstance.nodeSize = levelData.nodeSize;
 
         gridInstance.CreateGrid();
 
         Vector3 tileScale = new Vector3(gridInstance.nodeSize, gridInstance.nodeSize, gridInstance.nodeSize);
 
         PlaceTiles(tileScale);
-        PlaceBombs(bombAmountToSpawn);
+        PlaceBombs(levelData.bombAmount);
+        ReSizeBackGround();
 
         levelState = LevelState.Active;
     }
@@ -39,7 +38,7 @@ public class Level : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // if(levelState == LevelState.Active)
+        if(levelState == LevelState.Active)
             HandleInput();
     }
 
@@ -54,6 +53,7 @@ public class Level : MonoBehaviour
             SelectTile(cameraPos);
         }
     }
+
 
     /// <summary>
     /// Places tiles on grid node posiitons
@@ -78,7 +78,12 @@ public class Level : MonoBehaviour
         }
     }
 
+    public void ReSizeBackGround()
+    {
+        Vector3 newBGScale = new Vector3(levelData.width * levelData.nodeSize , levelData.height*levelData.nodeSize, 1) + Vector3.one * levelData.nodeSize;
+        gridBackGround.transform.localScale = newBGScale;
 
+    }
 
     /// <summary>
     /// Adds n bombs onto the grid
@@ -129,6 +134,7 @@ public class Level : MonoBehaviour
             {
                 tile.GetComponent<Tile>().ChangeState(TileState.HasBomb);
                 levelState = LevelState.Over;
+                GameManager.instance.GameOver();
             }
             else
             {

@@ -8,6 +8,9 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
     GameObject currentGame;
 
+    [Header("UI Screens")]
+    public GameObject gameOverScreen;
+
     void Awake()
     {
         // Make the object singleton
@@ -27,6 +30,11 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         currentGame = Instantiate(levelPrefab, Vector3.zero, Quaternion.identity);
+    }
+
+    public void GameOver()
+    {
+        gameOverScreen.SetActive(true);
     }
 
 }

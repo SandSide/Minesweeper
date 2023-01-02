@@ -32,3 +32,9 @@ public class GameManager : MonoBehaviour
 }
 
 
+public enum LevelState{
+    Over,
+    Active
+}
+
+

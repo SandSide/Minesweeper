@@ -46,10 +46,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tilePrefab: {fileID: 3025915692586984078, guid: e18667a4149c09346ac3d0dfd0cc6aaf, type: 3}
-  bombAmountToSpawn: 50
-  width: 30
-  height: 20
-  nodeSize: 0.4
+  bombAmountToSpawn: 100
+  width: 20
+  height: 10
+  nodeSize: 0.5
 --- !u!114 &9101545402367527692
 MonoBehaviour:
   m_ObjectHideFlags: 0

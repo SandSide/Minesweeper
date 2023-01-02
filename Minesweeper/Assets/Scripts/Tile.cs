@@ -5,12 +5,21 @@ using TMPro;
 
 public class Tile : MonoBehaviour
 {
+    [Header("Tile Elements")]
     public TMP_Text bombNumber;
     public SpriteRenderer spriteRen;
 
+    [Header("Tile Colours")]
+    public Color hiddenColour;
+    public Color HasBombColour;
+    public Color clickedColour;
+
+    [Header("Number Colours")]
+    public Color[] numberColour;
+
     void Start()
     {
-        spriteRen.color = Color.gray;
+        spriteRen.color = hiddenColour;
         bombNumber.text = "";
     }
 
@@ -24,14 +33,18 @@ public class Tile : MonoBehaviour
         // Change tile based on state
         if(newState == TileState.HasBomb)
         {
-            spriteRen.color = Color.red;
+            spriteRen.color = HasBombColour;
         }
         if(newState == TileState.Clicked)
         {
-            spriteRen.color = Color.white;
+            spriteRen.color = clickedColour;
 
             if(bombNum > 0)
+            {
                 bombNumber.text = bombNum.ToString();
+                bombNumber.color = numberColour[bombNum-1];
+            }
+
         }
     }
 }

@@ -5,6 +5,8 @@ using UnityEngine;
 public class Level : MonoBehaviour
 {
     public GameObject tilePrefab;
+    
+    [Header("Level Settings")]
     public int bombAmountToSpawn = 10;
     public int width = 10;
     public int height = 10;
@@ -14,11 +16,12 @@ public class Level : MonoBehaviour
     private Grid gridInstance;
     private List<GridNode> visitedNodes = new List<GridNode>();
 
+    private LevelState levelState;
+
     void Awake()
     {
         gridInstance = GetComponent<Grid>();
 
-        Debug.Log(gridInstance);
         gridInstance.width = width;
         gridInstance.height = height;
         gridInstance.nodeSize = nodeSize;
@@ -30,10 +33,20 @@ public class Level : MonoBehaviour
         PlaceTiles(tileScale);
         PlaceBombs(bombAmountToSpawn);
 
+        levelState = LevelState.Active;
     }
 
-        // Update is called once per frame
+    // Update is called once per frame
     void Update()
+    {
+        // if(levelState == LevelState.Active)
+            HandleInput();
+    }
+
+    /// <summary>
+    /// Handle User input
+    /// </summary>
+    public void HandleInput()
     {
         if(Input.GetMouseButtonDown(0))
         {
@@ -115,6 +128,7 @@ public class Level : MonoBehaviour
             if(node.hasBomb)
             {
                 tile.GetComponent<Tile>().ChangeState(TileState.HasBomb);
+                levelState = LevelState.Over;
             }
             else
             {
@@ -127,8 +141,6 @@ public class Level : MonoBehaviour
                     visitedNodes = new List<GridNode>();
                     RecursiveTraverse(node);
                 }
-
-
             } 
  
             node.isHidden = false;   
@@ -171,39 +183,21 @@ public class Level : MonoBehaviour
 
 
 
-    // public void ShowTilesAround(GridNode node)
-    // {
-    //     List<GridNode> neighbours = GetNeighbourNodes(node);
-    //     List<GridNode> checkedNeighbours = new List<GridNode>();
 
-    //     foreach( GridNode n in neighbours)
-    //     {
-            
-
-            
-            
-    //         if(CheckNeighbours(n) == 0)
-    //         {
-    //             GameObject tile = tileDictonary[n.gridPos];
-    //             tile.GetComponent<Tile>().ChangeState(TileState.Clicked);
-
-    //             checkedNeighbours.Add(n);
-                
-    //         }
-    //     }
-    // }
-
-
-
-
-    void RecursiveTraverse(GridNode currentNode)
+    /// <summary>
+    /// Traverse GridNodes around a gridnode which has bomb free enighbours
+    /// </summary>
+    /// <param name="node"> Node to traverse around </param>
+    public void RecursiveTraverse(GridNode currentNode)
     {
         
         List<GridNode> neighbours = GetNeighbourNodes(currentNode);
 
+        // If neighbours have no bombs
         if(CheckNeighbours(currentNode) == 0)
-        {
+        {   
 
+            // Get current node tile
             GameObject tile = tileDictonary[currentNode.gridPos];
 
             tile.GetComponent<Tile>().ChangeState(TileState.Clicked);
@@ -211,7 +205,7 @@ public class Level : MonoBehaviour
             visitedNodes.Add(currentNode);
 
 
-
+            // Traverse neighbours
             foreach(GridNode n in neighbours)
             {
                 tile = tileDictonary[n.gridPos];
@@ -255,3 +249,4 @@ public class Level : MonoBehaviour
     }
 
 }
+

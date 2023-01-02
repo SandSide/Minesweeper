@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 3025915692586984078}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 629008630865430101}
@@ -100,6 +100,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bombNumber: {fileID: 7404614575408814618}
   spriteRen: {fileID: 3025915692586984077}
+  hiddenColour: {r: 0, g: 0.65882355, b: 1, a: 1}
+  HasBombColour: {r: 0.7607843, g: 0.21176471, b: 0.08627451, a: 1}
+  clickedColour: {r: 0.9607843, g: 0.9647059, b: 0.98039216, a: 1}
+  numberColour:
+  - {r: 0.09803922, g: 0.16470589, b: 0.3372549, a: 1}
+  - {r: 0.26666668, g: 0.7411765, b: 0.19607843, a: 1}
+  - {r: 0.9098039, g: 0.25490198, b: 0.09411765, a: 1}
+  - {r: 0.88235295, g: 0.69411767, b: 0.17254902, a: 1}
+  - {r: 0.54901963, g: 0.47843137, b: 0.9019608, a: 1}
+  - {r: 0.28235295, g: 0.49411765, b: 0.6901961, a: 1}
+  - {r: 0.49803922, g: 0.56078434, b: 0.6509804, a: 1}
+  - {r: 0.18431373, g: 0.21176471, b: 0.2509804, a: 1}
 --- !u!1 &4817450405685226926
 GameObject:
   m_ObjectHideFlags: 0

@@ -17,7 +17,7 @@ public class Tile : MonoBehaviour
     [Header("Number Colours")]
     public Color[] numberColour;
 
-    void Start()
+    void Awake()
     {
         spriteRen.color = hiddenColour;
         bombNumber.text = "";

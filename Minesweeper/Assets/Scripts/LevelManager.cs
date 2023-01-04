@@ -2,8 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Manages the state of the game. At awake, it set us the levle by first generating the grid, tiles and placing the bombs.
+/// It then handles users input and interaces with the grid
+/// </summary>
 public class LevelManager : MonoBehaviour
 {
+    [Header("Grid Prefabs")]
     public GameObject tilePrefab;
     public GameObject gridBackGround;
     
@@ -29,6 +34,9 @@ public class LevelManager : MonoBehaviour
             HandleInput();
     }
 
+    /// <summary>
+    /// Creates the grid, tiles and placeds bombs onto the grid to get to be interaced with
+    /// </summary>
     public void SetUpLevel()
     {
         gridInstance = GetComponent<Grid>();

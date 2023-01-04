@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,6 +11,13 @@ public class GameManager : MonoBehaviour
 
     [Header("UI Screens")]
     public GameObject gameOverScreen;
+
+    [Header("Game Level Buttons")]
+    public Button easyLevel;
+    public Button normalLevel;
+    public Button hardLevel;
+
+    public LevelScriptableObject[] levels;
 
     void Awake()
     {
@@ -25,17 +33,35 @@ public class GameManager : MonoBehaviour
         }
 
     }
-    
-    // Start is called before the first frame update
+
+
     void Start()
     {
-        UIManager.instance.SwitchScreen("Main Menu");
-        currentGame = Instantiate(levelPrefab, Vector3.zero, Quaternion.identity);
-    }
+        easyLevel.onClick.AddListener(delegate {StartLevel("Easy"); });
+        normalLevel.onClick.AddListener(delegate {StartLevel("Normal"); });
+        hardLevel.onClick.AddListener(delegate {StartLevel("Hard"); });
 
-    public void GameOver()
+        UIManager.instance.SwitchScreen("Main Menu");
+    }
+    
+
+    /// <summary>
+    /// Starts the level mentioned
+    /// </summary>
+    /// <param name="levelName"> Name of the levle to start</param>
+    public void StartLevel(string levelName)
     {
-        gameOverScreen.SetActive(true);
+        // Find level
+        foreach(LevelScriptableObject level in levels)
+        {
+            if (level.name == levelName)
+            {
+                // Create levle instances and give levle details
+                currentGame = Instantiate(levelPrefab, Vector3.zero, Quaternion.identity);
+                currentGame.GetComponent<LevelManager>().levelData = level;
+                currentGame.GetComponent<LevelManager>().StartLevel();
+            }
+        }
     }
 
 }

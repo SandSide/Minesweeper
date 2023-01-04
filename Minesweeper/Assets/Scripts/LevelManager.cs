@@ -23,7 +23,8 @@ public class LevelManager : MonoBehaviour
 
     void Awake()
     {
-        SetUpLevel();
+        if(levelData!= null)
+            StartLevel();
     }
 
 
@@ -32,6 +33,15 @@ public class LevelManager : MonoBehaviour
     {
         if(levelState == LevelState.Active)
             HandleInput();
+    }
+
+    /// <summary>
+    /// Creates the grid and starts the level
+    /// </summary>
+    public void StartLevel()
+    {
+        SetUpLevel();
+        UIManager.instance.SwitchScreen("Game Overlay");
     }
 
     /// <summary>
@@ -148,7 +158,7 @@ public class LevelManager : MonoBehaviour
             {
                 tile.GetComponent<Tile>().ChangeState(TileState.HasBomb);
                 levelState = LevelState.Over;
-                GameManager.instance.GameOver();
+                UIManager.instance.SwitchScreen("Game Over");
             }
             else
             {

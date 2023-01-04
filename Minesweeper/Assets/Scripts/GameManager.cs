@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        UIManager.instance.SwitchScreen("Main Menu");
         currentGame = Instantiate(levelPrefab, Vector3.zero, Quaternion.identity);
     }
 

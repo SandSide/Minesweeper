@@ -54,7 +54,10 @@ public class UIManager : MonoBehaviour
 
                 currentScreen = s.screen;
                 currentScreen.SetActive(true);
+                return;
             }
         }
+
+        Debug.Log($"Screen {screenName} not found");
     }
 }

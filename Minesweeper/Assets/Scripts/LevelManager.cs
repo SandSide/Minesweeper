@@ -18,6 +18,19 @@ public class LevelManager : MonoBehaviour
 
     void Awake()
     {
+        SetUpLevel();
+    }
+
+
+    // Update is called once per frame
+    void Update()
+    {
+        if(levelState == LevelState.Active)
+            HandleInput();
+    }
+
+    public void SetUpLevel()
+    {
         gridInstance = GetComponent<Grid>();
 
         gridInstance.width = levelData.width;
@@ -33,13 +46,6 @@ public class LevelManager : MonoBehaviour
         ReSizeBackGround();
 
         levelState = LevelState.Active;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if(levelState == LevelState.Active)
-            HandleInput();
     }
 
     /// <summary>

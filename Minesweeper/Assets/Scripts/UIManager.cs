@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 [System.Serializable]
 public struct screenData{
@@ -21,6 +22,10 @@ public class UIManager : MonoBehaviour
     public List<screenData> screenList;
 
     private GameObject currentScreen;
+
+    [Header("Game Overlay Settings")]
+    public TMP_Text bombCountText;
+    public TMP_Text timerText;
 
     void Awake()
     {
@@ -60,4 +65,14 @@ public class UIManager : MonoBehaviour
 
         Debug.Log($"Screen {screenName} not found");
     }
+
+    public void UpdateBombCount(int bombAmmount){
+        bombCountText.text = bombAmmount.ToString();
+    }
+
+    public void UpdateTimer(int seconds){
+
+        timerText.text = seconds.ToString();
+    }
+
 }

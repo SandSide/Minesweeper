@@ -19,6 +19,9 @@ public class LevelManager : MonoBehaviour
     private Grid gridInstance;
     private LevelState levelState;
 
+    private int bombsLeft;
+    private int timerSeconds;
+
     void Awake()
     {
         if(levelData!= null)
@@ -30,7 +33,10 @@ public class LevelManager : MonoBehaviour
     void Update()
     {
         if(levelState == LevelState.Active)
+        {
             HandleInput();
+        }
+
     }
 
     /// <summary>
@@ -40,6 +46,10 @@ public class LevelManager : MonoBehaviour
     {
         SetUpLevel();
         UIManager.instance.SwitchScreen("Game Overlay");
+
+        levelState = LevelState.Active;
+        
+        StartCoroutine(Timer());
     }
 
     /// <summary>
@@ -47,21 +57,24 @@ public class LevelManager : MonoBehaviour
     /// </summary>
     public void SetUpLevel()
     {
+        // Create Grid
         gridInstance = GetComponent<Grid>();
-
         gridInstance.width = levelData.width;
         gridInstance.height = levelData.height;
         gridInstance.nodeSize = levelData.nodeSize;
-
         gridInstance.CreateGrid();
-
         Vector3 tileScale = new Vector3(gridInstance.nodeSize, gridInstance.nodeSize, gridInstance.nodeSize);
+
 
         PlaceTiles(tileScale);
         PlaceBombs(levelData.bombAmount);
         ReSizeBackGround();
 
-        levelState = LevelState.Active;
+        timerSeconds = 0;
+
+        // Update UI
+        UIManager.instance.UpdateBombCount(levelData.bombAmount);
+        bombsLeft = levelData.bombAmount;
     }
 
     /// <summary>
@@ -201,12 +214,17 @@ public class LevelManager : MonoBehaviour
         {            
             tileDictonary[node.gridPos].GetComponent<Tile>().ChangeState(TileState.Flagged);
             node.nodeState = NodeState.Flagged;
+            UIManager.instance.UpdateBombCount(levelData.bombAmount);
+            bombsLeft--;
         }
         else if(node.nodeState == NodeState.Flagged)
         {
             tileDictonary[node.gridPos].GetComponent<Tile>().ChangeState(TileState.Hidden);
             node.nodeState = NodeState.Hidden;
+            bombsLeft++;
         }
+
+        UIManager.instance.UpdateBombCount(bombsLeft);
     }
 
 
@@ -251,6 +269,17 @@ public class LevelManager : MonoBehaviour
     {
         levelState = LevelState.Over;
         UIManager.instance.SwitchScreen("Game Won");
+    }
+
+
+    IEnumerator Timer()
+    {
+        while (true)
+        {
+            timerSeconds += 1;
+            UIManager.instance.UpdateTimer(timerSeconds);
+            yield return new WaitForSeconds(1.0f);
+        }
     }
 }
 

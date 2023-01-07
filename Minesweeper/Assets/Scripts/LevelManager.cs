@@ -17,8 +17,6 @@ public class LevelManager : MonoBehaviour
 
     private Dictionary<Vector2, GameObject> tileDictonary = new Dictionary<Vector2, GameObject>();
     private Grid gridInstance;
-    private List<GridNode> visitedNodes = new List<GridNode>();
-
     private LevelState levelState;
 
     void Awake()
@@ -74,11 +72,19 @@ public class LevelManager : MonoBehaviour
         if(Input.GetMouseButtonDown(0))
         {
             Vector3 cameraPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            SelectTile(cameraPos);
+            ClickTile(cameraPos);
 
             if(CheckForWinCondition()) 
                 GameWon();
         }
+
+        if(Input.GetMouseButtonDown(1)){
+            FlagTile(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+
+            if(CheckForWinCondition()) 
+                GameWon();
+        }
+
     }
 
 
@@ -105,6 +111,9 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Reszies background iamge of grid to surrond the grid nodes
+    /// </summary>
     public void ReSizeBackGround()
     {
         Vector3 newBGScale = new Vector3(levelData.width * levelData.nodeSize , levelData.height*levelData.nodeSize, 1) + Vector3.one * levelData.nodeSize;
@@ -145,7 +154,7 @@ public class LevelManager : MonoBehaviour
     /// Get closests node to world position
     /// </summary>
     /// <param name="worldPos"> World position to get gridnode of </param>
-    public void SelectTile(Vector3 worldPos)
+    public void ClickTile(Vector3 worldPos)
     {
         // Get Grid node based on mouse pos
         Vector3 cameraPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -165,13 +174,12 @@ public class LevelManager : MonoBehaviour
             else
             {
                 // COunt bombs around node
-                int bombCount = CheckNeighbours(node);
+                int bombCount = gridInstance.CheckNeighbours(node);
                 tile.GetComponent<Tile>().ChangeState(TileState.Clicked, bombCount);
                 
                 // If not bombs around it
                 if(bombCount == 0){
-                    visitedNodes = new List<GridNode>();
-                    RecursiveTraverse(node);
+                    gridInstance.RecursiveTraverse(node, tileDictonary);
                 }
             } 
  
@@ -179,111 +187,46 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Flaggs/Unflaggs grid ndoe nearst to posiiton
+    /// </summary>
+    /// <param name="worldPos"> Position to find nearst node of</param>
+    public void FlagTile(Vector3 worldPos)
+    {
+        // Get Grid node based on mouse pos
+        Vector3 cameraPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        GridNode node = gridInstance.WorldPositionToGridNode(cameraPos);
+
+        if(node.nodeState == NodeState.Hidden)
+        {            
+            tileDictonary[node.gridPos].GetComponent<Tile>().ChangeState(TileState.Flagged);
+            node.nodeState = NodeState.Flagged;
+        }
+        else if(node.nodeState == NodeState.Flagged)
+        {
+            tileDictonary[node.gridPos].GetComponent<Tile>().ChangeState(TileState.Hidden);
+            node.nodeState = NodeState.Hidden;
+        }
+    }
+
 
     /// <summary>
-    /// Get list of nodes around node
+    /// Checks if player meets the win condititon
     /// </summary>
     /// <param name="node"> Node to get neighbours of </param>
     /// <returns> List of neighbour nodes </returns>
-    public List<GridNode> GetNeighbourNodes(GridNode node)
-    {
-        List<GridNode> nodeList = new List<GridNode>();
-
-        int x = (int)node.gridPos.x;
-        int y = (int)node.gridPos.y;
-
-        for(int i = x - 1; i <= x + 1 && i < gridInstance.width; i++)
-        {
-            for(int j = y - 1; j <= y + 1; j++)
-            {
-
-                if(i >= gridInstance.width || i <0)
-                    continue;
-
-                if(j >= gridInstance.height || j <0)
-                    continue;
-             
-                if(x == i && y == j)
-                    continue;
-
-                nodeList.Add(gridInstance.grid[i,j]);
-            }
-        }
-
-        return nodeList;
-    }
-
-
-
-
-
-    /// <summary>
-    /// Traverse GridNodes around a gridnode which has bomb free enighbours
-    /// </summary>
-    /// <param name="node"> Node to traverse around </param>
-    public void RecursiveTraverse(GridNode currentNode)
-    {
-        
-        List<GridNode> neighbours = GetNeighbourNodes(currentNode);
-
-        // If neighbours have no bombs
-        if(CheckNeighbours(currentNode) == 0)
-        {   
-
-            // Get current node tile
-            GameObject tile = tileDictonary[currentNode.gridPos];
-
-            tile.GetComponent<Tile>().ChangeState(TileState.Clicked);
-            currentNode.nodeState = NodeState.Clicked;
-            visitedNodes.Add(currentNode);
-
-
-            // Traverse neighbours
-            foreach(GridNode n in neighbours)
-            {
-                tile = tileDictonary[n.gridPos];
-                tile.GetComponent<Tile>().ChangeState(TileState.Clicked, CheckNeighbours(n));
-                n.nodeState = NodeState.Clicked;
-
-
-                if(!visitedNodes.Contains(n))
-                    RecursiveTraverse(n);
-            }
-
-        }
-    }
-
-    /// <summary>
-    /// Get number of bobms around gridnode
-    /// </summary>
-    /// <param name="node"> Node to count around </param>
-    /// <returns> Number of bombs around node </returns>
-    public int CheckNeighbours(GridNode node)
-    {
-
-        List<GridNode> neighbours = GetNeighbourNodes(node);
-        int bombCount = 0;
-
-        foreach (GridNode n in neighbours)
-        {
-            if(n.hasBomb)
-                bombCount++;
-        }
-
-        return bombCount;
-    }
-
     public bool CheckForWinCondition()
     {
         int minClickedNodes = (levelData.height * levelData.width) - levelData.bombAmount;
         
+        // Checks to see if any node with no bombs has not been clicked
         for(int i = 0; i < levelData.height; i++)
         {
             for(int j = 0; j < levelData.height; j++)
             {
                 GridNode node = gridInstance.grid[i,j];
 
-                if(node.nodeState == NodeState.Hidden && !node.hasBomb)
+                if((node.nodeState == NodeState.Hidden || node.nodeState == NodeState.Flagged) && !node.hasBomb)
                     return false;
 
             }
@@ -292,13 +235,18 @@ public class LevelManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Game has been lost
+    /// </summary>
     public void GameOver()
     {
         levelState = LevelState.Over;
         UIManager.instance.SwitchScreen("Game Over");
-
     }
 
+    /// <summary>
+    /// Game has been won
+    /// </summary>
     public void GameWon()
     {
         levelState = LevelState.Over;

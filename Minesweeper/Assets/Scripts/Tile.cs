@@ -13,14 +13,14 @@ public class Tile : MonoBehaviour
     public Color hiddenColour;
     public Color HasBombColour;
     public Color clickedColour;
+    public Color flaggedColour;
 
     [Header("Number Colours")]
     public Color[] numberColour;
 
     void Awake()
     {
-        spriteRen.color = hiddenColour;
-        bombNumber.text = "";
+        ChangeState(TileState.Hidden);
     }
 
     /// <summary>
@@ -30,28 +30,39 @@ public class Tile : MonoBehaviour
     /// <param name="bombNum"> Number of bombs to dispaly as text </param>
     public void ChangeState(TileState newState, int bombNum = 0)
     {
-        // Change tile based on state
-        if(newState == TileState.HasBomb)
-        {
-            spriteRen.color = HasBombColour;
-        }
-        if(newState == TileState.Clicked)
-        {
-            spriteRen.color = clickedColour;
 
-            if(bombNum > 0)
-            {
-                bombNumber.text = bombNum.ToString();
-                bombNumber.color = numberColour[bombNum-1];
-            }
+        switch(newState)
+        {
+            case TileState.Hidden:
+                spriteRen.color = hiddenColour;
+                bombNumber.text = "";
+                break;
 
+            case TileState.HasBomb:
+                spriteRen.color = HasBombColour;
+                break;
+
+            case TileState.Clicked:
+                spriteRen.color = clickedColour;
+                if(bombNum > 0)
+                {
+                    bombNumber.text = bombNum.ToString();
+                    bombNumber.color = numberColour[bombNum-1];
+                }
+                break;   
+
+            case TileState.Flagged:
+                spriteRen.color = flaggedColour;
+                break;
         }
     }
 }
 
 public enum TileState{
     HasBomb,
-    Clicked
+    Hidden,
+    Clicked,
+    Flagged
 }
 
 

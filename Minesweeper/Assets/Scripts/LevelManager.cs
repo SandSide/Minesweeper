@@ -75,6 +75,9 @@ public class LevelManager : MonoBehaviour
         {
             Vector3 cameraPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             SelectTile(cameraPos);
+
+            if(CheckForWinCondition()) 
+                GameWon();
         }
     }
 
@@ -149,7 +152,7 @@ public class LevelManager : MonoBehaviour
         GridNode node = gridInstance.WorldPositionToGridNode(cameraPos);
 
         // If if it wasnt clciked before
-        if(node.isHidden)
+        if(node.nodeState == NodeState.Hidden)
         {
             GameObject tile = tileDictonary[node.gridPos];
 
@@ -157,8 +160,7 @@ public class LevelManager : MonoBehaviour
             if(node.hasBomb)
             {
                 tile.GetComponent<Tile>().ChangeState(TileState.HasBomb);
-                levelState = LevelState.Over;
-                UIManager.instance.SwitchScreen("Game Over");
+                GameOver();
             }
             else
             {
@@ -173,9 +175,10 @@ public class LevelManager : MonoBehaviour
                 }
             } 
  
-            node.isHidden = false;   
+            node.nodeState = NodeState.Clicked;   
         }
     }
+
 
     /// <summary>
     /// Get list of nodes around node
@@ -231,7 +234,7 @@ public class LevelManager : MonoBehaviour
             GameObject tile = tileDictonary[currentNode.gridPos];
 
             tile.GetComponent<Tile>().ChangeState(TileState.Clicked);
-            currentNode.isHidden = false;
+            currentNode.nodeState = NodeState.Clicked;
             visitedNodes.Add(currentNode);
 
 
@@ -240,7 +243,7 @@ public class LevelManager : MonoBehaviour
             {
                 tile = tileDictonary[n.gridPos];
                 tile.GetComponent<Tile>().ChangeState(TileState.Clicked, CheckNeighbours(n));
-                n.isHidden = false;
+                n.nodeState = NodeState.Clicked;
 
 
                 if(!visitedNodes.Contains(n))
@@ -249,14 +252,6 @@ public class LevelManager : MonoBehaviour
 
         }
     }
-
-
-
-
-
-
-
-
 
     /// <summary>
     /// Get number of bobms around gridnode
@@ -278,5 +273,36 @@ public class LevelManager : MonoBehaviour
         return bombCount;
     }
 
+    public bool CheckForWinCondition()
+    {
+        int minClickedNodes = (levelData.height * levelData.width) - levelData.bombAmount;
+        
+        for(int i = 0; i < levelData.height; i++)
+        {
+            for(int j = 0; j < levelData.height; j++)
+            {
+                GridNode node = gridInstance.grid[i,j];
+
+                if(node.nodeState == NodeState.Hidden && !node.hasBomb)
+                    return false;
+
+            }
+        }
+
+        return true;
+    }
+
+    public void GameOver()
+    {
+        levelState = LevelState.Over;
+        UIManager.instance.SwitchScreen("Game Over");
+
+    }
+
+    public void GameWon()
+    {
+        levelState = LevelState.Over;
+        UIManager.instance.SwitchScreen("Game Won");
+    }
 }
 

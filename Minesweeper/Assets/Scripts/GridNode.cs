@@ -7,16 +7,20 @@ public class GridNode
     public Vector3 position;
     public Vector2 gridPos;
     public bool hasBomb;
-    public bool isHidden;
+    public NodeState nodeState;
 
-    public bool test = false;
-
-    public GridNode(Vector3 pos, bool hasBomb, int x, int y, bool isHidden)
+    public GridNode(Vector3 pos, bool hasBomb, int x, int y, NodeState nodeState)
     {
         position = pos;
         this.hasBomb = hasBomb;
         gridPos.x = x;
         gridPos.y = y;
-        this.isHidden = isHidden;
+        this.nodeState = nodeState;
     }
+}
+
+public enum NodeState{
+    Hidden,
+    Clicked,
+    Flagged
 }

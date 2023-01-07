@@ -54,7 +54,7 @@ public class Grid : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 Vector2 nodePos = bottomLeftCornerPos + Vector2.right * (x * nodeSize + nodeRadius) + Vector2.up * (y * nodeSize + nodeRadius);
-                grid[x, y] = new GridNode(nodePos, false, x, y, true);
+                grid[x, y] = new GridNode(nodePos, false, x, y, NodeState.Hidden);
             }
         }
     }
@@ -93,13 +93,7 @@ public class Grid : MonoBehaviour
                 {
                     Gizmos.color = (n.hasBomb) ? Color.red : defaultNodeColour;
 
-                    if(n.test)
-                        Gizmos.color = Color.yellow;
-                    Gizmos.DrawCube(n.position, gizmoNodeSize);
-      
                 }
-
-
             }
         }
     }

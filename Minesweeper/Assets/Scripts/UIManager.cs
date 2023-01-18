@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 [System.Serializable]
@@ -27,6 +28,13 @@ public class UIManager : MonoBehaviour
     public TMP_Text bombCountText;
     public TMP_Text timerText;
 
+    [Header("Game Over Buttons")]
+    public Button retryLevel;
+    public Button exitLevel;
+
+    [Header("Game Won Buttons")]
+    public Button exitLevelW;
+
     void Awake()
     {
                // Make the object singleton
@@ -39,6 +47,14 @@ public class UIManager : MonoBehaviour
             Destroy(gameObject);
             return;
         } 
+    }
+
+
+    void Start()
+    {
+        exitLevel.onClick.AddListener(GameManager.instance.EndLevel);
+        retryLevel.onClick.AddListener(GameManager.instance.RestartLevel);
+        exitLevelW.onClick.AddListener(GameManager.instance.EndLevel);
     }
 
     /// <summary>
@@ -66,10 +82,19 @@ public class UIManager : MonoBehaviour
         Debug.Log($"Screen {screenName} not found");
     }
 
+
+    /// <summary>
+    /// Updates bomb amount text on game overlay
+    /// </summary>
+    /// <param name="bombAmmount"> Number to display</param>
     public void UpdateBombCount(int bombAmmount){
         bombCountText.text = bombAmmount.ToString();
     }
 
+    /// <summary>
+    /// Updates game time in game overlay
+    /// </summary>
+    /// <param name="seconds"> Game time in seconds</param>
     public void UpdateTimer(int seconds){
 
         timerText.text = seconds.ToString();

@@ -64,6 +64,33 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// End current active level
+    /// </summary>
+    public void EndLevel()
+    {
+        // If there is a current game
+        if(currentGame != null)
+        {
+            Destroy(currentGame);
+            currentGame = null;
+
+            UIManager.instance.SwitchScreen("Main Menu");
+        }
+    }
+
+    /// <summary>
+    /// Restart current active level
+    /// </summary>
+    public void RestartLevel()
+    {
+        if(currentGame != null)
+        {
+            LevelScriptableObject levelData = currentGame.GetComponent<LevelManager>().levelData;
+            EndLevel();
+            StartLevel(levelData.name);
+        }
+    }
 }
 
 

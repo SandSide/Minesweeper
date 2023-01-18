@@ -15,9 +15,10 @@ public class LevelManager : MonoBehaviour
     [Header("Level Settings")]
     public LevelScriptableObject levelData;
 
-    private Dictionary<Vector2, GameObject> tileDictonary = new Dictionary<Vector2, GameObject>();
+    public Dictionary<Vector2, GameObject> tileDictonary = new Dictionary<Vector2, GameObject>();
     private Grid gridInstance;
     private LevelState levelState;
+    private GridNode currentHoverNode;
 
     private int bombsLeft;
     private int timerSeconds;
@@ -35,6 +36,7 @@ public class LevelManager : MonoBehaviour
         if(levelState == LevelState.Active)
         {
             HandleInput();
+            HighlightNode();
         }
 
     }
@@ -82,18 +84,24 @@ public class LevelManager : MonoBehaviour
     /// </summary>
     public void HandleInput()
     {
+
+        bool madeAMove = false;
+
         if(Input.GetMouseButtonDown(0))
         {
-            Vector3 cameraPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            ClickTile(cameraPos);
-
-            if(CheckForWinCondition()) 
-                GameWon();
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            ClickTile(mousePos);
+            madeAMove = true;
         }
 
-        if(Input.GetMouseButtonDown(1)){
+        if(Input.GetMouseButtonDown(1))
+        {
             FlagTile(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+            madeAMove = true;
+        }
 
+        if(madeAMove)
+        {
             if(CheckForWinCondition()) 
                 GameWon();
         }
@@ -227,6 +235,28 @@ public class LevelManager : MonoBehaviour
         UIManager.instance.UpdateBombCount(bombsLeft);
     }
 
+
+    public void HighlightNode()
+    {
+        Vector3 cameraPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        GridNode node = gridInstance.WorldPositionToGridNode(cameraPos);
+        
+        if(node == currentHoverNode)
+            return;
+
+        if(currentHoverNode != null && currentHoverNode.nodeState == NodeState.Hidden)
+            tileDictonary[currentHoverNode.gridPos].GetComponent<Tile>().ChangeState(TileState.Hidden);
+
+        currentHoverNode = null;
+
+    
+        if(node.nodeState == NodeState.Hidden)
+        {
+            tileDictonary[node.gridPos].GetComponent<Tile>().ChangeState(TileState.Highlight);
+            currentHoverNode = node;
+        }  
+        
+    }
 
     /// <summary>
     /// Checks if player meets the win condititon

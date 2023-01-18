@@ -62,8 +62,6 @@ public class Grid : MonoBehaviour
         }
     }
 
-
-
     /// <summary>
     /// Translate world position into grid position
     /// </summary>

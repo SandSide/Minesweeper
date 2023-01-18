@@ -14,6 +14,7 @@ public class Tile : MonoBehaviour
     public Color HasBombColour;
     public Color clickedColour;
     public Color flaggedColour;
+    public Color highlightColour;
 
     [Header("Number Colours")]
     public Color[] numberColour;
@@ -54,6 +55,10 @@ public class Tile : MonoBehaviour
             case TileState.Flagged:
                 spriteRen.color = flaggedColour;
                 break;
+
+            case TileState.Highlight:
+                spriteRen.color = highlightColour;
+                break;
         }
     }
 }
@@ -62,7 +67,8 @@ public enum TileState{
     HasBomb,
     Hidden,
     Clicked,
-    Flagged
+    Flagged,
+    Highlight
 }
 
 
